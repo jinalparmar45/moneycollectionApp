@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.example.moneycollectionapp.MoneyFriendMapping
 import com.example.moneycollectionapp.R
 import com.example.moneycollectionapp.databinding.FragmentNotificationsBinding
@@ -91,63 +90,9 @@ class NotificationsFragment : Fragment() {
             moneyList.addAll(it)
         }
         submitbtn.setOnClickListener {
-            Log.d("EnterdFriends1", "${Autocomplete.text.toString()}")
-            if(amount.text.toString().toInt() <= 0 || Autocomplete.text.toString().trim().equals(""))
-            {
-                if(amount.text.toString().toInt() <= 0){
-                    errAmount.visibility = TextView.VISIBLE
-                }else{
-                    errAmount.visibility = TextView.GONE
-                }
-                if(Autocomplete.text.toString().trim().equals("")){
-                    errfrnd.visibility = TextView.VISIBLE
-                }else{
-                    errfrnd.visibility = TextView.GONE
-                }
-            }else{
-                var shared: List<String> = Autocomplete.text.toString().split(",")
 
-                if(type.equals("Debit") && shared.size > 2){
-                    // show error
-                    errfrnd.visibility = TextView.VISIBLE
-                }else{
-                    errfrnd.visibility = TextView.GONE
-                    var Moneyobj = Money(Amount= amount.text.toString().toInt(), Type = type, SharedIn = shared.size, Date = (LocalDateTime.now()).format(
-                        DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm")).toString())
-                    if(shared.size > 0) {
-                        notificationsViewModel.insertSpending(Moneyobj)
-                        Log.d("EnterdFriends2", "${Moneyobj}")
-                        var moneyID :Int =1
+            insertData(Autocomplete, amount, errAmount, errfrnd, type, notificationsViewModel)
 
-
-                        moneyID = moneyList.size+1
-                        Log.d("EnterdFriends3", "${moneyID}")
-                        for(friendname in shared){
-                            var friendID : Int = 0
-                            Log.d("EnterdFriends4", "${moneyID} // $friendname" )
-                            for(item in frndList){
-                                if(friendname.trim().equals(item.FName.trim())) {
-
-                                    friendID = item.FriendId!!
-                                    var sharedamt = 0.0f
-                                    if(type.equals("Credit")){
-                                        sharedamt = amount.text.toString().toFloat() / (shared.size)
-                                    }else{
-                                        sharedamt = amount.text.toString().toFloat()
-                                    }
-
-                                    var mappingobj = MoneyFriendMapping(FriendId = friendID, MoneyId = moneyID, SharedAmt = sharedamt, Type = type)
-                                    Log.d("EnterdFriends5", " $mappingobj")
-                                    notificationsViewModel.insertMoneyFriendMapping(mappingobj)
-                }
-
-                                }
-
-                        }
-                    }
-                }
-                Toast.makeText(this.requireContext(), "Inserted successfully", Toast.LENGTH_SHORT).show()
-            }
         }
 //        submitbtn1.setOnClickListener {
 //
@@ -225,6 +170,88 @@ class NotificationsFragment : Fragment() {
 //            textView.text = it
 //        }
         return root
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun insertData(
+        Autocomplete: MultiAutoCompleteTextView,
+        amount: EditText,
+        errAmount: TextView,
+        errfrnd: TextView,
+        type: String,
+        notificationsViewModel: NotificationsViewModel
+    ) {
+        Log.d("EnterdFriends1", "${Autocomplete.text.toString()}")
+        if (amount.text.toString().toInt() <= 0 || Autocomplete.text.toString().trim().equals("")) {
+            if (amount.text.toString().toInt() <= 0) {
+                errAmount.visibility = TextView.VISIBLE
+            } else {
+                errAmount.visibility = TextView.GONE
+            }
+            if (Autocomplete.text.toString().trim().equals("")) {
+                errfrnd.visibility = TextView.VISIBLE
+            } else {
+                errfrnd.visibility = TextView.GONE
+            }
+        } else {
+            var shared: List<String> = Autocomplete.text.toString().split(",")
+            if (shared.size == 1) {
+                errfrnd.visibility = TextView.VISIBLE
+            } else {
+            if (type.equals("Debit") && shared.size > 2) {
+                // show error
+                errfrnd.visibility = TextView.VISIBLE
+            } else {
+                errfrnd.visibility = TextView.GONE
+                var Moneyobj = Money(
+                    Amount = amount.text.toString().toInt(),
+                    Type = type,
+                    SharedIn = shared.size,
+                    Date = (LocalDateTime.now()).format(
+                        DateTimeFormatter.ofPattern("dd-MMM-yy hh:mm")
+                    ).toString()
+                )
+                if (shared.size > 0) {
+                    notificationsViewModel.insertSpending(Moneyobj)
+                    Log.d("EnterdFriends2", "${Moneyobj}")
+                    var moneyID: Int = 1
+
+
+                    moneyID = moneyList.size + 1
+                    Log.d("EnterdFriends3", "${moneyID}")
+                    for (friendname in shared) {
+                        var friendID: Int = 0
+                        Log.d("EnterdFriends4", "${moneyID} // $friendname")
+                        for (item in frndList) {
+                            if (friendname.trim().equals(item.FName.trim())) {
+
+                                friendID = item.FriendId!!
+                                var sharedamt = 0.0f
+                                if (type.equals("Credit")) {
+                                    sharedamt = amount.text.toString().toFloat() / (shared.size)
+                                } else {
+                                    sharedamt = amount.text.toString().toFloat()
+                                }
+
+                                var mappingobj = MoneyFriendMapping(
+                                    FriendId = friendID,
+                                    MoneyId = moneyID,
+                                    SharedAmt = sharedamt,
+                                    Type = type
+                                )
+                                Log.d("EnterdFriends5", " $mappingobj")
+                                notificationsViewModel.insertMoneyFriendMapping(mappingobj)
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            Toast.makeText(this.requireContext(), "Inserted successfully", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
     }
 
     private fun setFriends(it: List<Friend>?) {
