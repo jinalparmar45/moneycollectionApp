@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Money Collection </string>
+    <string name="title_home">Spending</string>
+    <string name="title_dashboard">Friends</string>
+    <string name="title_notifications">Collection</string>
+    <string-array name="transaction_type">
+        <item>Debit</item>
+        <item>Credit</item>
+    </string-array>
+</resources>
