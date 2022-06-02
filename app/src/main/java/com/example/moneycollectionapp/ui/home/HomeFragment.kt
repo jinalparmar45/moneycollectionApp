@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
@@ -51,15 +52,14 @@ class HomeFragment : Fragment() {
         var moneyList = ArrayList<Money>()
         HomeViewModel.allMoney.observe(viewLifecycleOwner){
             getallSpendings(it, moneyList)
-            var total : Float = 0.0f
-            for(item in moneyList){
-                if(item.Type.equals("Credit")){
-                    total += item.Amount
-                }else{
-                    total -= item.Amount
-                }
-            }
+            //var total : Float = 0.0f
+           var  total : Float= getTotalSpendings(moneyList)
+
+            recyclerview.visibility = View.VISIBLE
+            (root.findViewById(R.id.LoadingImage) as ImageView).visibility = View.GONE
+            (root.findViewById(R.id.Loadingtxt) as TextView).visibility = View.GONE
             root.findViewById<TextView>(R.id.SpendingTotal).text = total.toString()
+
         }
         //moneyList .add(Money(Amount = 0, SharedIn = 0, Type = "Loading", Date = ""))
 //        for (i in 1..5){
@@ -70,6 +70,18 @@ class HomeFragment : Fragment() {
         recyclerview.adapter = spendingAdapter
 
         return root
+    }
+
+    private fun getTotalSpendings(moneyList: ArrayList<Money>): Float {
+        var total = 0.0f
+        for(item in moneyList){
+            if(item.Type.equals("Credit")){
+                total += item.Amount
+            }else{
+                total -= item.Amount
+            }
+        }
+        return total
     }
 
     private fun getallSpendings(it: List<Money>?, moneyList: ArrayList<Money>) {
